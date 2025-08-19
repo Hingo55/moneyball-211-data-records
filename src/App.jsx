@@ -249,6 +249,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [dbStatistics, setDbStatistics] = useState([])
   const [availableStrategies, setAvailableStrategies] = useState([])
+  const [isSorted, setIsSorted] = useState(false)
 
   // Load data from Supabase on component mount
   useEffect(() => {
@@ -359,6 +360,9 @@ function App() {
   const handleScoreChange = async (statisticId, dimension, score) => {
     console.log('Score change:', { statisticId, dimension, score })
     
+    // Reset sorting when scores change so user can edit freely
+    setIsSorted(false)
+    
     // Update local state immediately for responsive UI
     setStatisticScores(prev => {
       const newScores = {
@@ -388,7 +392,7 @@ function App() {
     // Use database statistics if available, otherwise fall back to local data
     const statisticsToUse = dbStatistics.length > 0 ? dbStatistics : serviceRecordStatistics
     
-    return [...statisticsToUse]
+    const statisticsWithScores = [...statisticsToUse]
       .map(stat => {
         const scores = statisticScores[stat.id] || {
           validity: stat.validity_score || stat.validity || 3,
@@ -410,8 +414,18 @@ function App() {
           )
         }
       })
-      .sort((a, b) => b.weightedScore - a.weightedScore)
-  }, [weights, statisticScores, dbStatistics])
+
+    // Only sort if isSorted is true, otherwise maintain original order
+    if (isSorted) {
+      return statisticsWithScores.sort((a, b) => b.weightedScore - a.weightedScore)
+    } else {
+      return statisticsWithScores
+    }
+  }, [weights, statisticScores, dbStatistics, isSorted])
+
+  const handleSortByPriority = () => {
+    setIsSorted(true)
+  }
 
   if (isLoading) {
     return (
@@ -549,11 +563,23 @@ function App() {
 
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Service Record Statistic Priority
-            </h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Service Record Statistic Priority
+              </h2>
+              <button
+                onClick={handleSortByPriority}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  isSorted 
+                    ? 'bg-green-600 text-white shadow-md' 
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {isSorted ? '✓ Sorted by Priority' : 'List in Priority Order'}
+              </button>
+            </div>
             <div className="text-sm text-gray-500">
-              {rankedStatistics.length} statistics ranked
+              {rankedStatistics.length} statistics {isSorted ? 'ranked' : 'listed'}
             </div>
           </div>
         </div>
