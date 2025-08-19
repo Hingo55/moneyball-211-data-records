@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for 211 Moneyball Strategy App */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+  
+  .card {
+    @apply bg-white p-6 rounded-lg shadow border border-gray-200;
+  }
+  
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .metric-card {
+    @apply bg-gradient-to-r p-6 rounded-lg shadow text-white;
+  }
+
+  /* Custom slider styles */
+  .slider-blue::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 bg-blue-600 rounded-full cursor-pointer;
+  }
+  
+  .slider-green::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 bg-green-600 rounded-full cursor-pointer;
+  }
+  
+  .slider-purple::-webkit-slider-thumb {
+    @apply appearance-none w-5 h-5 bg-purple-600 rounded-full cursor-pointer;
+  }
+
+  .slider-blue::-moz-range-thumb {
+    @apply w-5 h-5 bg-blue-600 rounded-full cursor-pointer border-0;
+  }
+  
+  .slider-green::-moz-range-thumb {
+    @apply w-5 h-5 bg-green-600 rounded-full cursor-pointer border-0;
+  }
+  
+  .slider-purple::-moz-range-thumb {
+    @apply w-5 h-5 bg-purple-600 rounded-full cursor-pointer border-0;
+  }
+}
