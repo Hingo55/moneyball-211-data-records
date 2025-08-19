@@ -577,6 +577,13 @@ function App() {
               >
                 {isSorted ? '✓ Sorted by Priority' : 'List in Priority Order'}
               </button>
+              <button
+                onClick={loadDataFromDatabase}
+                disabled={isLoading}
+                className="px-4 py-2 rounded-lg font-medium bg-gray-600 hover:bg-gray-700 text-white transition-all duration-200 disabled:opacity-50"
+              >
+                {isLoading ? '🔄 Loading...' : '🔄 Refresh Data'}
+              </button>
             </div>
             <div className="text-sm text-gray-500">
               {rankedStatistics.length} statistics {isSorted ? 'ranked' : 'listed'}
