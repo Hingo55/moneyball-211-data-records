@@ -268,13 +268,24 @@ function App() {
       if (statistics && statistics.length > 0) {
         setDbStatistics(statistics)
         
-        // Update statisticScores with database values
+        // Update statisticScores with database values using UUID IDs
         const scores = {}
         statistics.forEach(stat => {
           scores[stat.id] = {
             validity: stat.validity_score,
             relevance: stat.relevance_score,
             actionability: stat.actionability_score
+          }
+        })
+        setStatisticScores(scores)
+      } else {
+        // If no database data, ensure local data scores are properly set
+        const scores = {}
+        serviceRecordStatistics.forEach(stat => {
+          scores[stat.id] = {
+            validity: stat.validity,
+            relevance: stat.relevance,
+            actionability: stat.actionability
           }
         })
         setStatisticScores(scores)
@@ -334,30 +345,51 @@ function App() {
   }
 
   const handleScoreChange = async (statisticId, dimension, score) => {
+    console.log('Score change:', { statisticId, dimension, score })
+    
     // Update local state immediately for responsive UI
-    setStatisticScores(prev => ({
-      ...prev,
-      [statisticId]: {
-        ...prev[statisticId],
-        [dimension]: parseInt(score)
+    setStatisticScores(prev => {
+      const newScores = {
+        ...prev,
+        [statisticId]: {
+          ...prev[statisticId],
+          [dimension]: parseInt(score)
+        }
       }
-    }))
+      console.log('Updated scores:', newScores)
+      return newScores
+    })
 
-    // Save to database
-    try {
-      await statisticsDatabase.updateStatisticScore(statisticId, dimension, score)
-    } catch (error) {
-      console.error('Error saving score to database:', error)
-      // Could show a toast notification here
+    // Save to database only if we have database data
+    if (dbStatistics.length > 0) {
+      try {
+        await statisticsDatabase.updateStatisticScore(statisticId, dimension, score)
+        console.log('Saved to database successfully')
+      } catch (error) {
+        console.error('Error saving score to database:', error)
+        // Could show a toast notification here
+      }
     }
   }
 
   const rankedStatistics = useMemo(() => {
-    return [...serviceRecordStatistics]
+    // Use database statistics if available, otherwise fall back to local data
+    const statisticsToUse = dbStatistics.length > 0 ? dbStatistics : serviceRecordStatistics
+    
+    return [...statisticsToUse]
       .map(stat => {
-        const scores = statisticScores[stat.id]
+        const scores = statisticScores[stat.id] || {
+          validity: stat.validity_score || stat.validity || 3,
+          relevance: stat.relevance_score || stat.relevance || 3,
+          actionability: stat.actionability_score || stat.actionability || 3
+        }
         return {
           ...stat,
+          // Ensure we have the right field names for display
+          statistic: stat.statistic || stat.name,
+          whyItMatters: stat.why_it_matters || stat.whyItMatters,
+          underlyingAssumptions: stat.underlying_assumptions || stat.underlyingAssumptions,
+          potentialFlaws: stat.potential_flaws || stat.potentialFlaws,
           currentScores: scores,
           weightedScore: (
             scores.validity * weights.validity +
@@ -367,7 +399,7 @@ function App() {
         }
       })
       .sort((a, b) => b.weightedScore - a.weightedScore)
-  }, [weights, statisticScores])
+  }, [weights, statisticScores, dbStatistics])
 
   if (isLoading) {
     return (
