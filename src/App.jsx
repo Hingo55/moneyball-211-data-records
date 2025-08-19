@@ -308,6 +308,18 @@ function App() {
     } catch (error) {
       console.error('Error loading data from database:', error)
       // Continue with local data if database fails
+      console.log('Using local data as fallback')
+      
+      // Ensure local data scores are properly set
+      const scores = {}
+      serviceRecordStatistics.forEach(stat => {
+        scores[stat.id] = {
+          validity: stat.validity,
+          relevance: stat.relevance,
+          actionability: stat.actionability
+        }
+      })
+      setStatisticScores(scores)
     } finally {
       setIsLoading(false)
     }
