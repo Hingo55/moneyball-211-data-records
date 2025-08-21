@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { statisticsDatabase } from './lib/supabase'
 
 const serviceRecordStatistics = [
@@ -129,31 +129,31 @@ function StatisticsTable({ statistics, strategy, onScoreChange }) {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                 Rank
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statistic
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                 Why It Matters
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-56">
                 Underlying Assumptions
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-96">
                 Potential Flaws / Blind Spots
               </th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                 Validity
               </th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                 Relevance
               </th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Actionability
               </th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                 Weighted Score
               </th>
             </tr>
@@ -162,26 +162,26 @@ function StatisticsTable({ statistics, strategy, onScoreChange }) {
             {statistics.map((stat, index) => {
               return (
                 <tr key={stat.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="bg-gray-900 text-white px-2 py-1 rounded-full text-sm font-bold">
                         #{index + 1}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     <div className="text-sm font-medium text-gray-900">{stat.statistic}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-700 max-w-xs">{stat.whyItMatters}</div>
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-gray-700">{stat.whyItMatters}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-700 max-w-xs">{stat.underlyingAssumptions}</div>
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-gray-700">{stat.underlyingAssumptions}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-700 max-w-xs">{stat.potentialFlaws}</div>
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-gray-700">{stat.potentialFlaws}</div>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-2 py-3 text-center">
                     <select
                       value={stat.currentScores.validity}
                       onChange={(e) => onScoreChange(stat.id, 'validity', e.target.value)}
@@ -192,7 +192,7 @@ function StatisticsTable({ statistics, strategy, onScoreChange }) {
                       ))}
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-2 py-3 text-center">
                     <select
                       value={stat.currentScores.relevance}
                       onChange={(e) => onScoreChange(stat.id, 'relevance', e.target.value)}
@@ -203,7 +203,7 @@ function StatisticsTable({ statistics, strategy, onScoreChange }) {
                       ))}
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-2 py-3 text-center">
                     <select
                       value={stat.currentScores.actionability}
                       onChange={(e) => onScoreChange(stat.id, 'actionability', e.target.value)}
@@ -214,7 +214,7 @@ function StatisticsTable({ statistics, strategy, onScoreChange }) {
                       ))}
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-2 py-3 text-center">
                     <div className="text-lg font-bold text-gray-900">{stat.weightedScore.toFixed(2)}</div>
                   </td>
                 </tr>
@@ -250,6 +250,13 @@ function App() {
   const [dbStatistics, setDbStatistics] = useState([])
   const [availableStrategies, setAvailableStrategies] = useState([])
   const [isSorted, setIsSorted] = useState(false)
+  const [lockedWeights, setLockedWeights] = useState({
+    validity: false,
+    relevance: false,
+    actionability: false
+  })
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const originalOrderRef = useRef([])
 
   // Load data from Supabase on component mount
   useEffect(() => {
@@ -269,6 +276,12 @@ function App() {
       if (statistics && statistics.length > 0) {
         setDbStatistics(statistics)
         
+        // Only set original order on first load (when originalOrder is empty)
+        if (originalOrderRef.current.length === 0) {
+          const order = statistics.map(stat => stat.id)
+          originalOrderRef.current = order
+        }
+        
         // Update statisticScores with database values using UUID IDs
         const scores = {}
         statistics.forEach(stat => {
@@ -281,6 +294,10 @@ function App() {
         setStatisticScores(scores)
       } else {
         // If no database data, ensure local data scores are properly set
+        if (originalOrderRef.current.length === 0) {
+          originalOrderRef.current = serviceRecordStatistics.map(stat => stat.id)
+        }
+        
         const scores = {}
         serviceRecordStatistics.forEach(stat => {
           scores[stat.id] = {
@@ -326,28 +343,61 @@ function App() {
     }
   }
 
+
   const handleStrategyChange = (strategyKey) => {
     setSelectedStrategy(strategyKey)
     setWeights(strategies[strategyKey].weights)
+    setIsSorted(false) // Reset sorting when strategy changes
+  }
+
+  const handleDatabaseStrategyChange = (strategy) => {
+    const strategyKey = strategy.strategy_name.toLowerCase().replace(/[^a-z]/g, '')
+    setSelectedStrategy(strategyKey)
+    setWeights({
+      validity: strategy.validity_weight,
+      relevance: strategy.relevance_weight,
+      actionability: strategy.actionability_weight
+    })
+    setIsSorted(false) // Reset sorting when strategy changes
   }
 
   const handleSliderChange = (dimension, value) => {
     const newValue = parseFloat(value)
-    const otherDimensions = Object.keys(weights).filter(key => key !== dimension)
+    
+    // Don't allow changes if this dimension is locked
+    if (lockedWeights[dimension]) return
+    
+    // Get unlocked dimensions (excluding the current one being changed)
+    const otherDimensions = Object.keys(weights).filter(key => key !== dimension && !lockedWeights[key])
+    
+    // If no other dimensions are unlocked, can't adjust this one
+    if (otherDimensions.length === 0) return
+    
     const remainingWeight = 1 - newValue
     
-    // Distribute remaining weight proportionally among other dimensions
-    const currentOtherTotal = otherDimensions.reduce((sum, key) => sum + weights[key], 0)
+    // Calculate locked weights total
+    const lockedTotal = Object.keys(weights)
+      .filter(key => key !== dimension && lockedWeights[key])
+      .reduce((sum, key) => sum + weights[key], 0)
+    
+    // Available weight for unlocked dimensions
+    const availableWeight = remainingWeight - lockedTotal
+    
+    // If not enough weight available, can't make this change
+    if (availableWeight < 0) return
+    
+    // Distribute available weight proportionally among unlocked dimensions
+    const currentUnlockedTotal = otherDimensions.reduce((sum, key) => sum + weights[key], 0)
     
     const newWeights = { ...weights, [dimension]: newValue }
     
-    if (currentOtherTotal > 0) {
+    if (currentUnlockedTotal > 0 && availableWeight > 0) {
       otherDimensions.forEach(key => {
-        newWeights[key] = (weights[key] / currentOtherTotal) * remainingWeight
+        newWeights[key] = (weights[key] / currentUnlockedTotal) * availableWeight
       })
-    } else {
-      // If other dimensions are 0, distribute equally
-      const equalShare = remainingWeight / otherDimensions.length
+    } else if (availableWeight > 0) {
+      // If other unlocked dimensions are 0, distribute equally
+      const equalShare = availableWeight / otherDimensions.length
       otherDimensions.forEach(key => {
         newWeights[key] = equalShare
       })
@@ -355,15 +405,26 @@ function App() {
     
     setWeights(newWeights)
     setSelectedStrategy('') // Clear radio selection when manually adjusting
+    setIsSorted(false) // Reset sorting when weights change
   }
 
-  const handleScoreChange = async (statisticId, dimension, score) => {
+  const toggleWeightLock = (dimension) => {
+    setLockedWeights(prev => ({
+      ...prev,
+      [dimension]: !prev[dimension]
+    }))
+  }
+
+  const handleScoreChange = (statisticId, dimension, score) => {
     console.log('Score change:', { statisticId, dimension, score })
     
     // Reset sorting when scores change so user can edit freely
     setIsSorted(false)
     
-    // Update local state immediately for responsive UI
+    // Mark that we have unsaved changes
+    setHasUnsavedChanges(true)
+    
+    // Update local state immediately for responsive UI (no database save)
     setStatisticScores(prev => {
       const newScores = {
         ...prev,
@@ -372,59 +433,98 @@ function App() {
           [dimension]: parseInt(score)
         }
       }
-      console.log('Updated scores:', newScores)
+      console.log('Updated scores (local only):', newScores)
       return newScores
     })
-
-    // Save to database only if we have database data
-    if (dbStatistics.length > 0) {
-      try {
-        await statisticsDatabase.updateStatisticScore(statisticId, dimension, score)
-        console.log('Saved to database successfully')
-      } catch (error) {
-        console.error('Error saving score to database:', error)
-        // Could show a toast notification here
-      }
-    }
   }
 
   const rankedStatistics = useMemo(() => {
     // Use database statistics if available, otherwise fall back to local data
     const statisticsToUse = dbStatistics.length > 0 ? dbStatistics : serviceRecordStatistics
     
-    const statisticsWithScores = [...statisticsToUse]
-      .map(stat => {
-        const scores = statisticScores[stat.id] || {
-          validity: stat.validity_score || stat.validity || 3,
-          relevance: stat.relevance_score || stat.relevance || 3,
-          actionability: stat.actionability_score || stat.actionability || 3
-        }
-        return {
-          ...stat,
-          // Ensure we have the right field names for display
-          statistic: stat.statistic || stat.name,
-          whyItMatters: stat.why_it_matters || stat.whyItMatters,
-          underlyingAssumptions: stat.underlying_assumptions || stat.underlyingAssumptions,
-          potentialFlaws: stat.potential_flaws || stat.potentialFlaws,
-          currentScores: scores,
-          weightedScore: (
-            scores.validity * weights.validity +
-            scores.relevance * weights.relevance +
-            scores.actionability * weights.actionability
-          )
-        }
-      })
+    const statisticsWithScores = statisticsToUse.map(stat => {
+      const scores = statisticScores[stat.id] || {
+        validity: stat.validity_score || stat.validity || 3,
+        relevance: stat.relevance_score || stat.relevance || 3,
+        actionability: stat.actionability_score || stat.actionability || 3
+      }
+      return {
+        ...stat,
+        // Ensure we have the right field names for display
+        statistic: stat.statistic || stat.name,
+        whyItMatters: stat.why_it_matters || stat.whyItMatters,
+        underlyingAssumptions: stat.underlying_assumptions || stat.underlyingAssumptions,
+        potentialFlaws: stat.potential_flaws || stat.potentialFlaws,
+        currentScores: scores,
+        weightedScore: (
+          scores.validity * weights.validity +
+          scores.relevance * weights.relevance +
+          scores.actionability * weights.actionability
+        )
+      }
+    })
 
-    // Only sort if isSorted is true, otherwise maintain original order
+    // Only sort if isSorted is true, otherwise return in original database order
     if (isSorted) {
-      return statisticsWithScores.sort((a, b) => b.weightedScore - a.weightedScore)
+      return [...statisticsWithScores].sort((a, b) => b.weightedScore - a.weightedScore)
     } else {
+      // Return in the exact order from database/local data (no sorting at all)
       return statisticsWithScores
     }
   }, [weights, statisticScores, dbStatistics, isSorted])
 
   const handleSortByPriority = () => {
     setIsSorted(true)
+  }
+
+  const handleSaveChanges = async () => {
+    if (!hasUnsavedChanges || dbStatistics.length === 0) return
+
+    try {
+      console.log('Saving all changes to database...')
+      
+      // Update each statistic individually using the existing updateStatisticScore function
+      const updatePromises = []
+      
+      for (const stat of dbStatistics) {
+        const scores = statisticScores[stat.id]
+        if (scores) {
+          // Only update if scores have changed from database values
+          if (scores.validity !== stat.validity_score) {
+            updatePromises.push(statisticsDatabase.updateStatisticScore(stat.id, 'validity', scores.validity))
+          }
+          if (scores.relevance !== stat.relevance_score) {
+            updatePromises.push(statisticsDatabase.updateStatisticScore(stat.id, 'relevance', scores.relevance))
+          }
+          if (scores.actionability !== stat.actionability_score) {
+            updatePromises.push(statisticsDatabase.updateStatisticScore(stat.id, 'actionability', scores.actionability))
+          }
+        }
+      }
+      
+      // Wait for all updates to complete
+      await Promise.all(updatePromises)
+      
+      // Update local dbStatistics to match saved data
+      setDbStatistics(prev => prev.map(stat => {
+        const scores = statisticScores[stat.id]
+        if (scores) {
+          return {
+            ...stat,
+            validity_score: scores.validity,
+            relevance_score: scores.relevance,
+            actionability_score: scores.actionability
+          }
+        }
+        return stat
+      }))
+      
+      setHasUnsavedChanges(false)
+      console.log('All changes saved successfully')
+    } catch (error) {
+      console.error('Error saving changes to database:', error)
+      // Could show a toast notification here
+    }
   }
 
   if (isLoading) {
@@ -458,7 +558,36 @@ function App() {
           <div className="mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Preset Strategies</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(strategies).map(([key, strategy]) => (
+              {availableStrategies.length > 0 ? availableStrategies.map((strategy) => {
+                const strategyKey = strategy.strategy_name.toLowerCase().replace(/[^a-z]/g, '')
+                return (
+                  <label key={strategy.id} className="cursor-pointer">
+                    <div className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                      selectedStrategy === strategyKey
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}>
+                      <div className="flex items-center mb-3">
+                        <input
+                          type="radio"
+                          name="strategy"
+                          value={strategyKey}
+                          checked={selectedStrategy === strategyKey}
+                          onChange={() => handleDatabaseStrategyChange(strategy)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <h4 className="ml-2 font-semibold text-gray-900">{strategy.strategy_name}</h4>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{strategy.description}</p>
+                      <div className="text-xs text-gray-500 flex gap-4">
+                        <div>Validity: {(strategy.validity_weight * 100).toFixed(0)}%</div>
+                        <div>Relevance: {(strategy.relevance_weight * 100).toFixed(0)}%</div>
+                        <div>Actionability: {(strategy.actionability_weight * 100).toFixed(0)}%</div>
+                      </div>
+                    </div>
+                  </label>
+                )
+              }) : Object.entries(strategies).map(([key, strategy]) => (
                 <label key={key} className="cursor-pointer">
                   <div className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                     selectedStrategy === key
@@ -477,7 +606,7 @@ function App() {
                       <h4 className="ml-2 font-semibold text-gray-900">{strategy.name}</h4>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{strategy.description}</p>
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="text-xs text-gray-500 flex gap-4">
                       <div>Validity: {(strategy.weights.validity * 100).toFixed(0)}%</div>
                       <div>Relevance: {(strategy.weights.relevance * 100).toFixed(0)}%</div>
                       <div>Actionability: {(strategy.weights.actionability * 100).toFixed(0)}%</div>
@@ -495,9 +624,21 @@ function App() {
               
               {/* Validity Slider */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Validity Weight: {(weights.validity * 100).toFixed(1)}%
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Validity Weight: {(weights.validity * 100).toFixed(1)}%
+                  </label>
+                  <button
+                    onClick={() => toggleWeightLock('validity')}
+                    className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                      lockedWeights.validity 
+                        ? 'bg-red-100 text-red-700 border border-red-300' 
+                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                    }`}
+                  >
+                    {lockedWeights.validity ? '🔒 Locked' : '🔓 Unlocked'}
+                  </button>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -505,16 +646,31 @@ function App() {
                   step="0.01"
                   value={weights.validity}
                   onChange={(e) => handleSliderChange('validity', e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-blue"
+                  disabled={lockedWeights.validity}
+                  className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
+                    lockedWeights.validity ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                  } slider-blue`}
                 />
-                <div className="text-xs text-gray-500">Data accuracy and trustworthiness</div>
+                <div className="text-xs text-gray-500">How well-supported is the underlying assumption for this in your specific context?</div>
               </div>
 
               {/* Relevance Slider */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Relevance Weight: {(weights.relevance * 100).toFixed(1)}%
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Relevance Weight: {(weights.relevance * 100).toFixed(1)}%
+                  </label>
+                  <button
+                    onClick={() => toggleWeightLock('relevance')}
+                    className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                      lockedWeights.relevance 
+                        ? 'bg-red-100 text-red-700 border border-red-300' 
+                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                    }`}
+                  >
+                    {lockedWeights.relevance ? '🔒 Locked' : '🔓 Unlocked'}
+                  </button>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -522,16 +678,31 @@ function App() {
                   step="0.01"
                   value={weights.relevance}
                   onChange={(e) => handleSliderChange('relevance', e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-green"
+                  disabled={lockedWeights.relevance}
+                  className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
+                    lockedWeights.relevance ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                  } slider-green`}
                 />
-                <div className="text-xs text-gray-500">Importance to organizational goals</div>
+                <div className="text-xs text-gray-500">How directly does this align with your organization's current strategic priorities?</div>
               </div>
 
               {/* Actionability Slider */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Actionability Weight: {(weights.actionability * 100).toFixed(1)}%
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Actionability Weight: {(weights.actionability * 100).toFixed(1)}%
+                  </label>
+                  <button
+                    onClick={() => toggleWeightLock('actionability')}
+                    className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                      lockedWeights.actionability 
+                        ? 'bg-red-100 text-red-700 border border-red-300' 
+                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                    }`}
+                  >
+                    {lockedWeights.actionability ? '🔒 Locked' : '🔓 Unlocked'}
+                  </button>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -539,9 +710,12 @@ function App() {
                   step="0.01"
                   value={weights.actionability}
                   onChange={(e) => handleSliderChange('actionability', e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-purple"
+                  disabled={lockedWeights.actionability}
+                  className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
+                    lockedWeights.actionability ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                  } slider-purple`}
                 />
-                <div className="text-xs text-gray-500">Ability to take action on the data</div>
+                <div className="text-xs text-gray-500">If this identifies a problem or opportunity, realistically can you do something about it with your current resources and systems?</div>
               </div>
             </div>
 
@@ -577,16 +751,24 @@ function App() {
               >
                 {isSorted ? '✓ Sorted by Priority' : 'List in Priority Order'}
               </button>
-              <button
-                onClick={loadDataFromDatabase}
-                disabled={isLoading}
-                className="px-4 py-2 rounded-lg font-medium bg-gray-600 hover:bg-gray-700 text-white transition-all duration-200 disabled:opacity-50"
-              >
-                {isLoading ? '🔄 Loading...' : '🔄 Refresh Data'}
-              </button>
+              {hasUnsavedChanges && (
+                <button
+                  onClick={handleSaveChanges}
+                  className="px-4 py-2 rounded-lg font-medium bg-orange-600 hover:bg-orange-700 text-white transition-all duration-200 shadow-md"
+                >
+                  💾 Save Changes
+                </button>
+              )}
             </div>
-            <div className="text-sm text-gray-500">
-              {rankedStatistics.length} statistics {isSorted ? 'ranked' : 'listed'}
+            <div className="flex items-center gap-4">
+              {hasUnsavedChanges && (
+                <div className="text-sm text-orange-600 font-medium">
+                  ⚠️ Unsaved changes
+                </div>
+              )}
+              <div className="text-sm text-gray-500">
+                {rankedStatistics.length} statistics {isSorted ? 'ranked' : 'listed'}
+              </div>
             </div>
           </div>
         </div>

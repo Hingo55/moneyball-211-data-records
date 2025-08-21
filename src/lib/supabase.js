@@ -23,7 +23,7 @@ export const statisticsDatabase = {
     const { data, error } = await supabase
       .from('service_statistics')
       .select('*')
-      .order('statistic')
+      .order('created_at')
     
     if (error) {
       console.error('Error fetching service statistics:', error)
